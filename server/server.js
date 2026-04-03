@@ -63,7 +63,7 @@ app.use("/api/auth", userRouter);
 app.use("/api/messages", messageRouter);
 
 // --- SERVER START ---
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
