@@ -17,7 +17,6 @@ app.use(cookieParser());
 
 // --- CORS CONFIGURATION ---
 const CLIENT_URL =
-  process.env.CLIENT_URL ||
   "https://chat-app-three-ivory-46.vercel.app";
 
 app.use(
