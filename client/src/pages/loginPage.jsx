@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import bgImage from "../assets/bg.png"; // ✅ add your background image
 
 const LoginPage = () => {
   const { login, authUser } = useContext(AuthContext);
@@ -29,7 +28,7 @@ const LoginPage = () => {
   return (
     <div
       className="min-h-screen flex items-center justify-center bg-cover bg-center"
-      style={{ backgroundImage: `url(${bgImage})` }}
+      style={{ backgroundImage: "url('/bgImage.svg')" }}
     >
       <form
         onSubmit={onSubmitHandler}
