@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import bgImage from "../assets/bg.png"; // ✅ add your background image
 
 const LoginPage = () => {
   const { login, authUser } = useContext(AuthContext);
@@ -14,7 +15,6 @@ const LoginPage = () => {
     password: "",
   });
 
-  // ✅ Redirect after login/signup success
   useEffect(() => {
     if (authUser) {
       navigate("/");
@@ -27,10 +27,13 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div
+      className="min-h-screen flex items-center justify-center bg-cover bg-center"
+      style={{ backgroundImage: `url(${bgImage})` }}
+    >
       <form
         onSubmit={onSubmitHandler}
-        className="bg-white shadow-lg rounded-lg p-8 w-[400px]"
+        className="bg-white/90 backdrop-blur-sm shadow-lg rounded-lg p-8 w-[400px]"
       >
         <h1 className="text-2xl font-bold text-center mb-6">
           {state === "login" ? "Login" : "Create Account"}
