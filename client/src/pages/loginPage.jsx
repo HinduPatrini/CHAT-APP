@@ -3,7 +3,8 @@ import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
-  const { login, authUser } = useContext(AuthContext);
+  // Added 'loading' and 'error' which are common in AuthContexts
+  const { login, authUser, loading, error } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [state, setState] = useState("login");
@@ -13,85 +14,103 @@ const LoginPage = () => {
     password: "",
   });
 
-  // redirect after login/signup
+  // Redirect if user is already authenticated
   useEffect(() => {
     if (authUser) {
       navigate("/");
     }
   }, [authUser, navigate]);
 
+  // Generic change handler to reduce repetitive code
+  const onChangeHandler = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   const onSubmitHandler = async (e) => {
     e.preventDefault();
-    await login(state, formData);
+    try {
+      await login(state, formData);
+    } catch (err) {
+      console.error("Authentication failed:", err);
+    }
   };
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center bg-cover bg-center"
+      className="min-h-screen flex items-center justify-center bg-gray-100 bg-cover bg-center"
       style={{ backgroundImage: "url('/bgImage.svg')" }}
     >
       <form
         onSubmit={onSubmitHandler}
-        className="bg-white shadow-lg rounded-lg p-8 w-[400px]"
+        className="bg-white shadow-xl rounded-xl p-8 w-full max-w-md transition-all"
       >
-        <h1 className="text-2xl font-bold text-center mb-6">
-          {state === "login" ? "Login" : "Create Account"}
+        <h1 className="text-3xl font-extrabold text-center text-gray-800 mb-2">
+          {state === "login" ? "Welcome Back" : "Join Us"}
         </h1>
+        <p className="text-center text-gray-500 mb-8">
+          {state === "login" ? "Enter your details to login" : "Sign up for a new account"}
+        </p>
 
-        {state === "signup" && (
-          <input
-            type="text"
-            placeholder="Full Name"
-            className="w-full border p-3 rounded mb-4"
-            value={formData.fullName}
-            onChange={(e) =>
-              setFormData({ ...formData, fullName: e.target.value })
-            }
-            required
-          />
+        {/* Display context errors if they exist */}
+        {error && (
+          <div className="bg-red-50 text-red-500 p-3 rounded mb-4 text-sm border border-red-200">
+            {error}
+          </div>
         )}
 
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full border p-3 rounded mb-4"
-          value={formData.email}
-          onChange={(e) =>
-            setFormData({ ...formData, email: e.target.value })
-          }
-          required
-        />
+        <div className="space-y-4">
+          {state === "signup" && (
+            <input
+              name="fullName"
+              type="text"
+              placeholder="Full Name"
+              className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              value={formData.fullName}
+              onChange={onChangeHandler}
+              required
+            />
+          )}
 
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full border p-3 rounded mb-4"
-          value={formData.password}
-          onChange={(e) =>
-            setFormData({ ...formData, password: e.target.value })
-          }
-          required
-        />
+          <input
+            name="email"
+            type="email"
+            placeholder="Email Address"
+            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            value={formData.email}
+            onChange={onChangeHandler}
+            required
+          />
+
+          <input
+            name="password"
+            type="password"
+            placeholder="Password"
+            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            value={formData.password}
+            onChange={onChangeHandler}
+            required
+          />
+        </div>
 
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white p-3 rounded hover:bg-blue-600"
+          disabled={loading}
+          className={`w-full mt-6 p-3 rounded-lg font-semibold text-white transition-colors ${
+            loading ? "bg-blue-300 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+          }`}
         >
-          {state === "login" ? "Login" : "Create Account"}
+          {loading ? "Processing..." : state === "login" ? "Login" : "Create Account"}
         </button>
 
-        <p className="text-center mt-4">
-          {state === "login"
-            ? "Don't have an account?"
-            : "Already have an account?"}
-          <span
-            onClick={() =>
-              setState(state === "login" ? "signup" : "login")
-            }
-            className="text-blue-500 cursor-pointer ml-2"
+        <p className="text-center mt-6 text-gray-600">
+          {state === "login" ? "Don't have an account?" : "Already have an account?"}
+          <button
+            type="button"
+            onClick={() => setState(state === "login" ? "signup" : "login")}
+            className="text-blue-600 font-medium hover:underline ml-2"
           >
-            {state === "login" ? "Create Account" : "Login"}
-          </span>
+            {state === "login" ? "Sign Up" : "Log In"}
+          </button>
         </p>
       </form>
     </div>
