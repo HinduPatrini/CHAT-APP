@@ -7,6 +7,7 @@ const backendUrl =
   import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 axios.defaults.baseURL = backendUrl;
+axios.defaults.withCredentials = true;
 
 export const AuthContext = createContext();
 
@@ -16,26 +17,25 @@ export const AuthProvider = ({ children }) => {
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [socket, setSocket] = useState(null);
 
-  // ✅ connect socket
   const connectSocket = (userData) => {
     if (!userData) return;
+
     if (socket?.connected) return;
 
     const newSocket = io(backendUrl, {
+      withCredentials: true,
       query: {
         userId: userData._id,
       },
     });
 
-    newSocket.connect();
-    setSocket(newSocket);
-
     newSocket.on("getOnlineUsers", (userIds) => {
       setOnlineUsers(userIds);
     });
+
+    setSocket(newSocket);
   };
 
-  // ✅ check user auth
   const checkAuth = async () => {
     try {
       const { data } = await axios.get("/api/auth/check");
@@ -45,11 +45,10 @@ export const AuthProvider = ({ children }) => {
         connectSocket(data.user);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message);
+      console.log(error.message);
     }
   };
 
-  // ✅ login / signup
   const login = async (state, credentials) => {
     try {
       const { data } = await axios.post(`/api/auth/${state}`, credentials);
@@ -70,7 +69,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ✅ logout
   const logout = () => {
     localStorage.removeItem("token");
     delete axios.defaults.headers.common["token"];
@@ -85,7 +83,6 @@ export const AuthProvider = ({ children }) => {
     toast.success("Logged out Successfully");
   };
 
-  // ✅ update profile
   const updateProfile = async (body) => {
     try {
       const { data } = await axios.put("/api/auth/update-profile", body);
@@ -99,16 +96,13 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ✅ run on token change
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common["token"] = token;
       checkAuth();
     }
 
-    return () => {
-      socket?.disconnect();
-    };
+    return () => socket?.disconnect();
   }, [token]);
 
   const value = {
