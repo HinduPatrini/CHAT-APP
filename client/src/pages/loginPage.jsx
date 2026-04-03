@@ -1,136 +1,99 @@
-import React, { useContext, useState } from 'react'
-import assets from '../assets/assets'
-import { AuthContext } from '../context/AuthContext'
+import React, { useContext, useEffect, useState } from "react";
+import { AuthContext } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
-  const [currState, setCurrState] = useState("Sign up")
-  const [fullName, setFullName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [bio, setBio] = useState("")
-  const [isDataSubmitted, setIsDataSubmitted] = useState(false)
+  const { login, authUser } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  const { login } = useContext(AuthContext)
+  const [state, setState] = useState("login");
 
-  const onSubmitHandler = (event) => {
-    event.preventDefault()
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+  });
 
-    if (currState === "Sign up" && !isDataSubmitted) {
-      setIsDataSubmitted(true)
-      return
+  // ✅ Redirect after login/signup success
+  useEffect(() => {
+    if (authUser) {
+      navigate("/");
     }
+  }, [authUser, navigate]);
 
-    login(
-      currState === "Sign up" ? "signup" : "login",
-      { fullName, email, password, bio }
-    )
-  }
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
+    await login(state, formData);
+  };
 
   return (
-    <div className='min-h-screen bg-cover bg-center flex items-center justify-center gap-8 sm:justify-evenly max-sm:flex-col backdrop-blur-2xl'>
-      <img src={assets.logo_big} alt="" className='w-[min(30vw,250px)]' />
-
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <form
         onSubmit={onSubmitHandler}
-        className='border-2 bg-white/10 text-white border-gray-500 p-6 flex flex-col gap-6 rounded-lg shadow-lg'
+        className="bg-white shadow-lg rounded-lg p-8 w-[400px]"
       >
-        <h2 className='font-medium text-2xl flex justify-between items-center'>
-          {currState}
-          {isDataSubmitted && (
-            <img
-              onClick={() => setIsDataSubmitted(false)}
-              src={assets.arrow_icon}
-              alt=""
-              className='w-5 cursor-pointer'
-            />
-          )}
-        </h2>
+        <h1 className="text-2xl font-bold text-center mb-6">
+          {state === "login" ? "Login" : "Create Account"}
+        </h1>
 
-        {currState === "Sign up" && !isDataSubmitted && (
+        {state === "signup" && (
           <input
-            onChange={(e) => setFullName(e.target.value)}
-            value={fullName}
             type="text"
-            placeholder='Full Name'
+            placeholder="Full Name"
+            className="w-full border p-3 rounded mb-4"
+            value={formData.fullName}
+            onChange={(e) =>
+              setFormData({ ...formData, fullName: e.target.value })
+            }
             required
-            className='p-2 border border-gray-500 rounded-md'
           />
         )}
 
-        {!isDataSubmitted && (
-          <>
-            <input
-              onChange={(e) => setEmail(e.target.value)}
-              value={email}
-              type="email"
-              placeholder='Email Address'
-              required
-              className='p-2 border border-gray-500 rounded-md'
-            />
+        <input
+          type="email"
+          placeholder="Email"
+          className="w-full border p-3 rounded mb-4"
+          value={formData.email}
+          onChange={(e) =>
+            setFormData({ ...formData, email: e.target.value })
+          }
+          required
+        />
 
-            <input
-              onChange={(e) => setPassword(e.target.value)}
-              value={password}
-              type="password"
-              placeholder='Password'
-              required
-              className='p-2 border border-gray-500 rounded-md'
-            />
-          </>
-        )}
-
-        {currState === "Sign up" && isDataSubmitted && (
-          <textarea
-            onChange={(e) => setBio(e.target.value)}
-            value={bio}
-            rows={4}
-            placeholder='Provide a short bio...'
-            required
-            className='p-2 border border-gray-500 rounded-md'
-          />
-        )}
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full border p-3 rounded mb-4"
+          value={formData.password}
+          onChange={(e) =>
+            setFormData({ ...formData, password: e.target.value })
+          }
+          required
+        />
 
         <button
-          type='submit'
-          className='py-3 bg-gradient-to-r from-purple-400 to-violet-600 rounded-md text-white'
+          type="submit"
+          className="w-full bg-blue-500 text-white p-3 rounded hover:bg-blue-600"
         >
-          {currState === "Sign up" ? "Create Account" : "Login Now"}
+          {state === "login" ? "Login" : "Create Account"}
         </button>
 
-        <div className='flex items-center gap-2 text-sm text-gray-400'>
-          <input type="checkbox" required />
-          <p>Agree to the terms of use & privacy policy.</p>
-        </div>
-
-        <div>
-          {currState === "Sign up" ? (
-            <p className='text-sm text-gray-600'>
-              Already have an account?{" "}
-              <span
-                className='font-medium text-violet-500 cursor-pointer'
-                onClick={() => {
-                  setCurrState("Login")
-                  setIsDataSubmitted(false)
-                }}
-              >
-                Login here
-              </span>
-            </p>
-          ) : (
-            <p className='text-sm text-gray-600'>
-              Create an account{" "}
-              <span
-                onClick={() => setCurrState("Sign up")}
-                className='font-medium text-violet-500 cursor-pointer'
-              >
-                Click here
-              </span>
-            </p>
-          )}
-        </div>
+        <p className="text-center mt-4">
+          {state === "login"
+            ? "Don't have an account?"
+            : "Already have an account?"}
+          <span
+            onClick={() =>
+              setState(state === "login" ? "signup" : "login")
+            }
+            className="text-blue-500 cursor-pointer ml-2"
+          >
+            {state === "login" ? "Create Account" : "Login"}
+          </span>
+        </p>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default LoginPage
+export default LoginPage;
