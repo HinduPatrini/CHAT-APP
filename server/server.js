@@ -1,6 +1,7 @@
 import express from "express";
 import "dotenv/config";
 import cors from "cors";
+import cookieParser from "cookie-parser"; // Added: Required for cookies
 import http from "http";
 import { connectDB } from "./lib/db.js";
 import userRouter from "./routes/userRoutes.js";
@@ -10,18 +11,23 @@ import { Server } from "socket.io";
 const app = express();
 const server = http.createServer(app);
 
-// Update CORS to allow your specific Vercel frontend URL
+// --- MIDDLEWARES ---
+// Increased limit slightly for base64 images (profile pics)
+app.use(express.json({ limit: "5mb" })); 
+app.use(cookieParser()); // Added: MUST have this to send/read JWT cookies
+
+// --- CORS CONFIGURATION ---
 app.use(cors({
   origin: "https://chat-app-three-ivory-46.vercel.app", 
-  credentials: true
+  credentials: true, // Added: Required for cookies to pass between front/back
+  methods: ["GET", "POST", "PUT", "DELETE"]
 }));
 
-app.use(express.json({ limit: "4mb" }));
-
-// Socket.IO (Note: This will work locally, but will have issues on Vercel Serverless)
+// --- SOCKET.IO SETUP ---
 export const io = new Server(server, {
   cors: {
     origin: "https://chat-app-three-ivory-46.vercel.app",
+    credentials: true, // Added: Required for socket auth with cookies
     methods: ["GET", "POST"],
   },
 });
@@ -39,21 +45,30 @@ io.on("connection", (socket) => {
   });
 });
 
-// Routes
-app.get("/", (req, res) => res.send("Server is running"));
+// --- ROUTES ---
+app.get("/", (req, res) => res.send("Server is running on Vercel"));
 app.use("/api/auth", userRouter);
 app.use("/api/messages", messageRouter);
 
-// Database connection logic for Serverless
+// --- SERVER START LOGIC ---
 const PORT = process.env.PORT || 5000;
 
-// Connect to DB before listening
-connectDB().then(() => {
-  if (process.env.NODE_ENV !== 'production') {
-    server.listen(PORT, () => {
-      console.log(`Server running on PORT: ${PORT}`);
-    });
+// Connect to DB once
+const startServer = async () => {
+  try {
+    await connectDB();
+    // Only listen manually if NOT on Vercel (Production)
+    if (process.env.NODE_ENV !== 'production') {
+      server.listen(PORT, () => {
+        console.log(`Server running on PORT: ${PORT}`);
+      });
+    }
+  } catch (err) {
+    console.error("DB Connection Error:", err);
   }
-});
+};
 
-export default app; // Export app for Vercel
+startServer();
+
+// CRITICAL for Vercel: Export the app
+export default app;

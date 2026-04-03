@@ -3,7 +3,15 @@ export function formatMessageTime(date) {
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
-    timeZone: "Asia/Kolkata"
-    
+    timeZone: "Asia/Kolkata",
+  });
+}
+
+// Optional: Useful for showing "Today", "Yesterday", or the Date in chat headers
+export function formatDate(date) {
+  return new Date(date).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
   });
 }
