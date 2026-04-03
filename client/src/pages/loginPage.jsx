@@ -27,81 +27,73 @@ const LoginPage = () => {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center bg-cover bg-center px-4"
+      className="min-h-screen flex items-center justify-center bg-cover bg-center"
       style={{ backgroundImage: "url('/bgImage.svg')" }}
     >
-      <div className="w-full max-w-md">
-        <form
-          onSubmit={onSubmitHandler}
-          className="bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl rounded-2xl p-8"
+      <form
+        onSubmit={onSubmitHandler}
+        className="bg-white shadow-lg rounded-lg p-8 w-[400px]"
+      >
+        <h1 className="text-2xl font-bold text-center mb-6">
+          {state === "login" ? "Login" : "Create Account"}
+        </h1>
+
+        {state === "signup" && (
+          <input
+            type="text"
+            placeholder="Full Name"
+            className="w-full border p-3 rounded mb-4"
+            value={formData.fullName}
+            onChange={(e) =>
+              setFormData({ ...formData, fullName: e.target.value })
+            }
+            required
+          />
+        )}
+
+        <input
+          type="email"
+          placeholder="Email"
+          className="w-full border p-3 rounded mb-4"
+          value={formData.email}
+          onChange={(e) =>
+            setFormData({ ...formData, email: e.target.value })
+          }
+          required
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full border p-3 rounded mb-4"
+          value={formData.password}
+          onChange={(e) =>
+            setFormData({ ...formData, password: e.target.value })
+          }
+          required
+        />
+
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white p-3 rounded hover:bg-blue-600"
         >
-          <h1 className="text-3xl font-bold text-center text-white mb-2">
-            {state === "login" ? "Welcome Back" : "Create Account"}
-          </h1>
+          {state === "login" ? "Login" : "Create Account"}
+        </button>
 
-          <p className="text-center text-white/80 mb-6">
-            {state === "login"
-              ? "Login to continue chatting"
-              : "Create your new account"}
-          </p>
-
-          {state === "signup" && (
-            <input
-              type="text"
-              placeholder="Full Name"
-              className="w-full p-3 rounded-xl mb-4 bg-white/80 outline-none"
-              value={formData.fullName}
-              onChange={(e) =>
-                setFormData({ ...formData, fullName: e.target.value })
-              }
-              required
-            />
-          )}
-
-          <input
-            type="email"
-            placeholder="Email"
-            className="w-full p-3 rounded-xl mb-4 bg-white/80 outline-none"
-            value={formData.email}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
+        <p className="text-center mt-4">
+          {state === "login"
+            ? "Don't have an account?"
+            : "Already have an account?"}
+          <span
+            onClick={() =>
+              setState(state === "login" ? "signup" : "login")
             }
-            required
-          />
-
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full p-3 rounded-xl mb-6 bg-white/80 outline-none"
-            value={formData.password}
-            onChange={(e) =>
-              setFormData({ ...formData, password: e.target.value })
-            }
-            required
-          />
-
-          <button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 transition-all text-white py-3 rounded-xl font-semibold"
+            className="text-blue-500 cursor-pointer ml-2"
           >
-            {state === "login" ? "Login" : "Create Account"}
-          </button>
-
-          <p className="text-center text-white mt-6">
-            {state === "login"
-              ? "Don't have an account?"
-              : "Already have an account?"}
-            <span
-              onClick={() =>
-                setState(state === "login" ? "signup" : "login")
-              }
-              className="ml-2 text-yellow-300 font-semibold cursor-pointer hover:underline"
-            >
-              {state === "login" ? "Create Account" : "Login"}
-            </span>
-          </p>
-        </form>
-      </div>
+            {state === "login" ? "Create Account" : "Login"}
+          </span>
+        </p>
+      </form>
     </div>
   );
 };
