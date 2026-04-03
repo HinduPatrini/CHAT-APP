@@ -65,11 +65,6 @@ app.use("/api/messages", messageRouter);
 // --- SERVER START ---
 const PORT = process.env.PORT || 10000;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
-
-
 const startServer = async () => {
   try {
     await connectDB();
@@ -79,7 +74,7 @@ const startServer = async () => {
       console.log(`Server running on PORT: ${PORT}`);
     });
   } catch (err) {
-    console.error("DB Connection Error:", err);
+    console.error("DB Connection Error:", err.message);
   }
 };
 
