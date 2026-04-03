@@ -2,6 +2,7 @@ import { createContext, useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
+import { useNavigate } from "react-router-dom"; // ✅ added
 
 const backendUrl =
   import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
@@ -12,6 +13,8 @@ axios.defaults.withCredentials = true;
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const navigate = useNavigate(); // ✅ added
+
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [authUser, setAuthUser] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
@@ -49,6 +52,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // ✅ FIXED LOGIN FUNCTION
   const login = async (state, credentials) => {
     try {
       const { data } = await axios.post(`/api/auth/${state}`, credentials);
@@ -63,6 +67,13 @@ export const AuthProvider = ({ children }) => {
         connectSocket(data.user);
 
         toast.success(data.message);
+
+        // 🔥 navigation added
+        if (state === "signup") {
+          navigate("/login"); // after signup go to login
+        } else {
+          navigate("/"); // after login go to home/chat
+        }
       }
     } catch (error) {
       toast.error(error.response?.data?.message || error.message);
@@ -81,6 +92,8 @@ export const AuthProvider = ({ children }) => {
     setSocket(null);
 
     toast.success("Logged out Successfully");
+
+    navigate("/login"); // ✅ optional but good
   };
 
   const updateProfile = async (body) => {
